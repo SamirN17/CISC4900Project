@@ -56,10 +56,13 @@ public class PortScanner {
         System.out.printf("Port %d is OPEN on %s%n", port, ipAddress);
 
         if (port == 80) {
+            socket.connect(new InetSocketAddress(ipAddress, port), 200);
             grabHttpBanner(socket);
         } else if (port == 21) {
+            socket.connect(new InetSocketAddress(ipAddress, port), 400);
             grabFtpBanner(socket);
         } else if (port == 22) {
+            socket.connect(new InetSocketAddress(ipAddress, port), 800);
             grabSshBanner(socket);
         }
 
