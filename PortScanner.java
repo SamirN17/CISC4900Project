@@ -1,14 +1,21 @@
 import java.util.Scanner;
 import java.io.IOException;
 import java.net.Socket;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.FileWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class PortScanner {
+
+    private static List<String> openPorts = new ArrayList<>();
+    private static List<String> closedPorts = new ArrayList<>();
+
     public static void main(String[] args) {
         System.err.println("VulnerabilityScan: Port Scanner Initialized.");
 
@@ -29,13 +36,25 @@ public class PortScanner {
         
         ExecutorService executorService = Executors.newFixedThreadPool(10);
 
-        System.err.printf("Scanning %s from port %d to port %d...%n\n", ipAddress, startPort, endPort);
+        System.out.printf("Scanning %s from port %d to port %d...%n\n", ipAddress, startPort, endPort);
         for (int port = startPort; port <= endPort; port++) {
             int currentPort = port;
             executorService.submit(() -> scanPortAndGrabBanner(ipAddress, currentPort));
         }
 
         executorService.shutdown();
+
+        try {
+            if (!executorService.awaitTermination(1, TimeUnit.MINUTES)) {
+                System.out.println("Some tasks took too long to finish. Forcing shutdown.");
+                executorService.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
+        }
+
+        printSummary();
+
         scanner.close();
     }
 
@@ -47,34 +66,41 @@ public class PortScanner {
             return false;
         }
     }
-
     public static void scanPortAndGrabBanner(String ipAddress, int port) {
-    try {
-        Socket socket = new Socket();
-        socket.connect(new InetSocketAddress(ipAddress, port), 200);  
+        try {
+            Socket socket = new Socket();
 
-        System.out.printf("Port %d is OPEN on %s%n", port, ipAddress);
+            if (port == 80) {
+                socket.connect(new InetSocketAddress(ipAddress, port), 300);
+                grabHttpBanner(socket);
+            } else if (port == 21) {
+                socket.connect(new InetSocketAddress(ipAddress, port), 500);
+                grabFtpBanner(socket);
+            } else if (port == 22) {
+                socket.connect(new InetSocketAddress(ipAddress, port), 1000);
+                grabSshBanner(socket);
+            } else if (port == 25) {
+                socket.connect(new InetSocketAddress(ipAddress, port), 700);
+                grabSmtpBanner(socket);
+            } else {
+                socket.connect(new InetSocketAddress(ipAddress, port), 2000); // Increase timeout for other ports
+            }
 
-        if (port == 80) {
-            socket.connect(new InetSocketAddress(ipAddress, port), 200);
-            grabHttpBanner(socket);
-        } else if (port == 21) {
-            socket.connect(new InetSocketAddress(ipAddress, port), 400);
-            grabFtpBanner(socket);
-        } else if (port == 22) {
-            socket.connect(new InetSocketAddress(ipAddress, port), 800);
-            grabSshBanner(socket);
-        }
+            String openMessage = String.format("Port %d is OPEN on %s", port, ipAddress);
+            System.out.println(openMessage);
+            openPorts.add(openMessage);
 
-        socket.close();
+            socket.close();
         } catch (IOException e) {
-           System.out.printf("Port %d is CLOSED or unreachable%n", port);
+            String errorMessage = String.format("Port %d is CLOSED or unreachable on %s", port, ipAddress);
+            System.out.println(errorMessage);
+            closedPorts.add(errorMessage);
         }
     }
 
     public static void grabHttpBanner(Socket socket) {
         try {
-            String httpRequest = "GET / HTTP/1.1\r\nHost: " + socket.getInetAddress().getHostName() + "\r\n\r\n";
+            String httpRequest = "GET / HTTP/1.1\r\nHost: " + socket.getInetAddress().getHostAddress() + "\r\n\r\n";
             socket.getOutputStream().write(httpRequest.getBytes());
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -114,6 +140,42 @@ public class PortScanner {
             }
         } catch (IOException e) {
             System.out.println("Error reading SSH banner.");
+        }
+    }
+
+    public static void grabSmtpBanner(Socket socket) {
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            String responseLine;
+
+            System.out.println("SMTP Banner: ");
+            while ((responseLine = reader.readLine()) != null && !responseLine.isEmpty()) {
+                System.out.println(responseLine);
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading SMTP banner.");
+        }
+    }
+
+    public static void printSummary() {
+        System.out.println("\n------------- SUMMARY -------------");
+
+        System.out.println("Open ports: ");
+        for (String open : openPorts) {
+            System.out.println(open);
+        }
+
+        System.out.println("\nClosed ports: ");
+        for (String closed : closedPorts) {
+            System.out.println(closed);
+        }
+    }
+
+    public static void logToFile(String logMessage) {
+        try (FileWriter out = new FileWriter("scan_results.txt", true)) {
+            out.write(logMessage + "\n");
+        } catch (IOException e) {
+            System.out.println("Error writing to file.");
         }
     }
 }
