@@ -1,0 +1,10 @@
+Service, Version, CVE_ID, Description
+Apache, 2.4.49, CVE-2021-41773, Path Traversal Vulnerability
+Apache, 2.4.50, CVE-2021-42013, Remote Code Execution
+OpenSSH, 8.6, CVE-2021-41617, Privilege Escalation Vulnerability
+OpenSSH, 7.9, CVE-2018-15473, User Enumeration Vulnerability
+FTP, 2.3.4, CVE-2011-1575, Remote Denial of Service Vulnerability
+HTTP, 2.4.49, CVE-2021-41773, Path Traversal Vulnerability
+MySQL, 5.7, CVE-2019-11358, Remote Code Execution
+Nginx, 1.18, CVE-2021-23017, Off-by-One Buffer Overflow
+Nginx, 1.19.6, CVE-2021-23008, HTTP/2 Denial of Service Vulnerability

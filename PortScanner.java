@@ -1,25 +1,28 @@
 import java.util.Scanner;
-import java.io.IOException;
 import java.net.Socket;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.HashMap;
+import java.util.Map;
+import java.io.*;
+
 
 public class PortScanner {
 
     private static List<String> openPorts = new ArrayList<>();
     private static List<String> closedPorts = new ArrayList<>();
+    private static Map<String, String> vulnerabilityDatabase = new HashMap<>();
 
     public static void main(String[] args) {
         System.err.println("VulnerabilityScan: Port Scanner Initialized.");
 
         Scanner scanner = new Scanner(System.in);
+
+        
 
         // IP address is input, and returned if it is an invalid IP Address
         System.out.println("Enter target IP Address: ");
@@ -31,7 +34,7 @@ public class PortScanner {
 
         System.out.println("Enter start port: ");
         int startPort = scanner.nextInt();
-        System.err.println("Enter end port: ");
+        System.out.println("Enter end port: ");
         int endPort = scanner.nextInt();
         
         ExecutorService executorService = Executors.newFixedThreadPool(10);
@@ -66,6 +69,9 @@ public class PortScanner {
             return false;
         }
     }
+
+    // ------------------ PORT SCANNER METHOD --------------------------------------------------------
+
     public static void scanPortAndGrabBanner(String ipAddress, int port) {
         try {
             Socket socket = new Socket();
@@ -82,6 +88,9 @@ public class PortScanner {
             } else if (port == 25) {
                 socket.connect(new InetSocketAddress(ipAddress, port), 700);
                 grabSmtpBanner(socket);
+            } else if (port == 443) {
+                socket.connect(new InetSocketAddress(ipAddress, port), 3000);
+                grabHttpsBanner(socket);
             } else {
                 socket.connect(new InetSocketAddress(ipAddress, port), 2000); // Increase timeout for other ports
             }
@@ -98,6 +107,8 @@ public class PortScanner {
         }
     }
 
+    // ------------------ BANNER GRABBER METHODS --------------------------------------------------------
+
     public static void grabHttpBanner(Socket socket) {
         try {
             String httpRequest = "GET / HTTP/1.1\r\nHost: " + socket.getInetAddress().getHostAddress() + "\r\n\r\n";
@@ -105,11 +116,16 @@ public class PortScanner {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String responseLine;
+            StringBuilder banner = new StringBuilder();
 
             System.out.println("HTTP Banner: ");
             while ((responseLine = reader.readLine()) != null && !responseLine.isEmpty()) {
                 System.out.println(responseLine);
+                banner.append(responseLine).append("\n");
             }
+
+            matchVulnerabilities("Apache", extractVersion(banner.toString()));
+
         } catch (IOException e) {
             System.out.println("Error reading HTTP banner.");
         }
@@ -119,11 +135,16 @@ public class PortScanner {
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String responseLine;
+            StringBuilder banner = new StringBuilder();
 
             System.out.println("FTP Banner: ");
             while ((responseLine = reader.readLine()) != null && !responseLine.isEmpty()) {
                 System.out.println(responseLine);
+                banner.append(responseLine).append("\n");
             }
+
+            matchVulnerabilities("FTP", extractVersion(banner.toString()));
+
         } catch (IOException e) {
             System.out.println("Error reading FTP banner.");
         }
@@ -133,11 +154,16 @@ public class PortScanner {
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String responseLine;
+            StringBuilder banner = new StringBuilder();
 
             System.out.println("SSH Banner: ");
             while ((responseLine = reader.readLine()) != null && !responseLine.isEmpty()) {
                 System.out.println(responseLine);
+                banner.append(responseLine).append("\n");
             }
+
+            matchVulnerabilities("OpenSSH", extractVersion(banner.toString()));
+            
         } catch (IOException e) {
             System.out.println("Error reading SSH banner.");
         }
@@ -147,13 +173,26 @@ public class PortScanner {
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String responseLine;
+            StringBuilder banner = new StringBuilder();
 
             System.out.println("SMTP Banner: ");
             while ((responseLine = reader.readLine()) != null && !responseLine.isEmpty()) {
                 System.out.println(responseLine);
+                banner.append(responseLine).append("\n");
             }
+
+            matchVulnerabilities("SMTP", extractVersion(banner.toString()));
+
         } catch (IOException e) {
             System.out.println("Error reading SMTP banner.");
+        }
+    }
+
+    public static void grabHttpsBanner(Socket socket) {
+        try {
+            System.out.println("HTTPS Banner is encrypted, attempting to connect to " + socket.getInetAddress());
+        } catch (Exception e) {
+            System.out.println("Unable to connect to HTTPS service.");
         }
     }
 
@@ -171,11 +210,48 @@ public class PortScanner {
         }
     }
 
+    // ------------------ VULNERABILITY DATABASE METHODS --------------------------------------------------------
+
     public static void logToFile(String logMessage) {
         try (FileWriter out = new FileWriter("scan_results.txt", true)) {
             out.write(logMessage + "\n");
         } catch (IOException e) {
             System.out.println("Error writing to file.");
         }
+    }
+
+    public static void loadVulnerabilityDatabase(String fileName) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                String service = parts[0].trim();
+                String version = parts[1].trim();
+                String cve = parts[2].trim();
+                String description = parts[3].trim();
+                vulnerabilityDatabase.put(service + version, cve + ": " + description);
+            }
+        } catch (IOException e) {
+            System.out.println("Error loading vulnerability database.");
+        }
+    }
+
+    public static void matchVulnerabilities(String service, String version) {
+        String key = service + version;
+        if (vulnerabilityDatabase.containsKey(key)) {
+            System.out.println("Vulnerability identified: " + vulnerabilityDatabase.get(key));
+        } else {
+            System.out.println("No known vulnerabilities identified for the service and version: " + service + version);
+        }
+    }
+
+    public static String extractVersion(String banner) {
+        if (banner.contains("/")) {
+            String[] parts = banner.split("/");
+            if (parts.length > 1) {
+                return parts[1].split(" ")[0];
+            }
+        }
+        return "Unknown";
     }
 }
