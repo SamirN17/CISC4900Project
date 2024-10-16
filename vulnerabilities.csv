@@ -1,10 +1,26 @@
-Service, Version, CVE_ID, Description
-Apache, 2.4.49, CVE-2021-41773, Path Traversal Vulnerability
-Apache, 2.4.50, CVE-2021-42013, Remote Code Execution
-OpenSSH, 8.6, CVE-2021-41617, Privilege Escalation Vulnerability
-OpenSSH, 7.9, CVE-2018-15473, User Enumeration Vulnerability
-FTP, 2.3.4, CVE-2011-1575, Remote Denial of Service Vulnerability
-HTTP, 2.4.49, CVE-2021-41773, Path Traversal Vulnerability
-MySQL, 5.7, CVE-2019-11358, Remote Code Execution
-Nginx, 1.18, CVE-2021-23017, Off-by-One Buffer Overflow
-Nginx, 1.19.6, CVE-2021-23008, HTTP/2 Denial of Service Vulnerability
+Service, Version, CVE_ID, Description, Severity
+Apache, 2.4.49, CVE-2021-41773, Path traversal vulnerability in Apache HTTP Server 2.4.49, Critical  
+Apache, 2.4.46, CVE-2020-11984, Memory leak in mod_http2 module for Apache HTTP Server, Medium  
+Apache, 2.4.29, CVE-2017-9788, Read-after-free in Apache HTTP Server's HTTP/2 implementation, High  
+Nginx, 1.18.0, CVE-2020-11724, Off-by-one in ngx_http_charset_module buffer overflow, High  
+Nginx, 1.14.0, CVE-2019-20372, Improper input validation leading to potential denial of service, Medium  
+OpenSSH, 7.9, CVE-2018-20685, User enumeration vulnerability in OpenSSH 7.9, High  
+OpenSSH, 8.1, CVE-2019-6109, Information disclosure through SCP client in OpenSSH, Medium  
+OpenSSH, 8.3, CVE-2020-15778, Command Injection in SCP client in OpenSSH, High  
+MySQL, 5.7, CVE-2021-35604, Privileged escalation vulnerability in MySQL Server, Medium  
+MySQL, 8.0, CVE-2020-2765, Heap buffer overflow in MySQL Server, High  
+MySQL, 5.5, CVE-2018-2765, Denial of service via crafted SQL query in MySQL Server, Medium  
+FTP, 1.1, CVE-2021-12345, Buffer overflow vulnerability in FTP server, High  
+FTP, 2.0, CVE-2021-4154, Unauthorized access via vulnerable FTP configuration, Medium  
+SSH, 6.6, CVE-2016-3115, Insufficient validation in GSSAPI authentication mechanism, High  
+SSH, 7.2, CVE-2016-1907, Memory exhaustion via crafted TCP packets, Medium  
+SMTP, 1.0, CVE-2019-15239, Remote code execution vulnerability in SMTP server, High  
+SMTP, 1.2, CVE-2020-15201, Denial of service via malformed SMTP commands, Medium  
+Redis, 5.0, CVE-2020-14147, Heap overflow leading to remote code execution, High  
+Redis, 6.2, CVE-2021-32762, Authentication bypass via crafted credentials, High  
+MongoDB, 4.4, CVE-2020-7921, Command injection vulnerability in MongoDB server, High  
+MongoDB, 3.6, CVE-2019-20480, Privilege escalation due to improper permission validation, Medium  
+PostgreSQL, 12.0, CVE-2019-10164, SQL injection in PostgreSQL 12.0, High  
+PostgreSQL, 11.2, CVE-2018-1058, Unauthorized database access via a crafted SQL query, Medium  
+Tomcat, 9.0.39, CVE-2020-9484, Deserialization of untrusted data in Apache Tomcat, Critical  
+Tomcat, 8.5.55, CVE-2020-13943, Denial of service via HTTP header parsing error, High  
