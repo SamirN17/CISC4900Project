@@ -28,47 +28,71 @@ public class PortScanner {
     // Database of known vulnerabilities, loaded from the CSV file
     private static Map<String, String> vulnerabilityDatabase = new HashMap<>();
 
+    private static final String LOG_FILE = "scan_log.txt";
+    private static final String REPORT_FILE = "scan_report.csv";
+
     public static void main(String[] args) {
-        System.err.println("VulnerabilityScan: Port Scanner Initialized.");
+        // Shows the main menu
+        showMenu();
+    }
 
+    public static void showMenu() {
         Scanner scanner = new Scanner(System.in);
+        while (true) {
+            System.out.println("============================================");
+            System.out.println("Wlecome to the VulnerabilityScan Menu");
+            System.out.println("1. Start a port scan");
+            System.out.println("2. View known vulnerabilities");
+            System.out.println("3. Exit");
+            System.out.print("Choose an option: ");
+            int option = scanner.nextInt();
+            switch (option) {
+                case 1:
+                    startScan();
+                    break;
+                case 2:
+                    printVulnerabilityDatabase();
+                    break;
+                case 3:
+                    System.out.println("Exiting the program.");
+                    System.exit(0);
+                default:
+                    System.out.println("Invalid option. Please try again.");
+            }
+        }
+    }
 
-        // Load vulnerability database
+    public static void startScan() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("\nPort Scan Selected");
+        System.out.println("==================");
+        
         loadVulnerabilityDatabase("vulnerabilities.csv");
 
-        // IP address is input, and checked if it is a invalid IP Address
-        System.out.println("Enter target IP Address: ");
+        System.out.print("Enter target IP Address: ");
         String ipAddress = scanner.nextLine();
         if (!isValidIPAddress(ipAddress)) {
             System.out.println("Invalid IP address. Please enter a valid IP address.");
+            logError("Invalid IP address entered: " + ipAddress);
             return;
         }
 
-        // Port range is input
-        System.out.println("Enter start port: ");
+        System.out.print("Enter start port: ");
         int startPort = scanner.nextInt();
-        System.out.println("Enter end port: ");
+        System.out.print("Enter end port: ");
         int endPort = scanner.nextInt();
-        
-        // Initializes a thread pool with a fixed number of threads for scanning ports concurrently
-        int numberOfPorts = endPort - startPort + 1;
-        int optimalThreads = Math.min(10, numberOfPorts / 5);  // Adjust based on range
-        ExecutorService executorService = Executors.newFixedThreadPool(optimalThreads);
 
-        // Starts scanning the range of ports on the target IP address
-        System.out.printf("Scanning %s from port %d to port %d...%n\n", ipAddress, startPort, endPort);
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        System.out.printf("Scanning %s from port %d to port %d...\n\n", ipAddress, startPort, endPort);
+
         for (int port = startPort; port <= endPort; port++) {
             int currentPort = port;
-
-            // This submits a port scanning task to the thread pool for each port in the range
             executorService.submit(() -> scanPortAndGrabBanner(ipAddress, currentPort));
         }
 
         executorService.shutdown();
-
-        // This watches for tasks that take too long to finish and forces the thread pool to shut down
         try {
-            if (!executorService.awaitTermination(1, TimeUnit.MINUTES)) {
+            if (!executorService.awaitTermination(2, TimeUnit.MINUTES)) {
                 System.out.println("Some tasks took too long to finish. Forcing shutdown.");
                 executorService.shutdownNow();
             }
@@ -76,9 +100,14 @@ public class PortScanner {
             executorService.shutdownNow();
         }
 
-        printSummary();
-
-        scanner.close();
+        System.out.println("Would you like to save the scan report to a file? (yes/no)");
+        Scanner scanner2 = new Scanner(System.in);
+        String saveToFile = scanner2.nextLine();
+        if (saveToFile.equalsIgnoreCase("yes")) {
+            generateReport(ipAddress);
+        } else {
+            printSummary();
+        }
     }
 
     public static boolean isValidIPAddress(String ipAddress) {
@@ -101,26 +130,7 @@ public class PortScanner {
                 // Creates a socket and attempts to connect to the specified port, with a timeout of 2 seconds
                 Socket socket = new Socket();
                 socket.connect(new InetSocketAddress(ipAddress, port), 2000);
-    
 
-                // if (port == 80) {
-                //     socket.connect(new InetSocketAddress(ipAddress, port), 300);
-                //     grabHttpBanner(socket);
-                // } else if (port == 21) {
-                //     socket.connect(new InetSocketAddress(ipAddress, port), 500);
-                //     grabFtpBanner(socket);
-                // } else if (port == 22) {
-                //     socket.connect(new InetSocketAddress(ipAddress, port), 1000);
-                //     grabSshBanner(socket);
-                // } else if (port == 25) {
-                //     socket.connect(new InetSocketAddress(ipAddress, port), 700);
-                //     grabSmtpBanner(socket);
-                // } else if (port == 443) {
-                //     socket.connect(new InetSocketAddress(ipAddress, port), 3000);
-                //     grabHttpsBanner(socket);
-                // } else {
-                //     socket.connect(new InetSocketAddress(ipAddress, port), 2000); // Increase timeout for other ports
-                // }
 
                 // if the port is open, add it to the list and attempt to grab a banner
                 String openMessage = String.format("Port %d is OPEN on %s", port, ipAddress);
@@ -154,10 +164,12 @@ public class PortScanner {
             } catch (IOException e) {
                 retries--;
                 if (retries == 0) {
-                    // If the port is closed or unreachable, add it to the closed port list
                     String errorMessage = String.format("Port %d is CLOSED or unreachable on %s", port, ipAddress);
                     System.out.println(errorMessage);
                     closedPorts.add(errorMessage);
+                    logError("Error connecting to port " + port + ": " + e.getMessage());
+                } else {
+                    logError("Retry attempt #" + (3 - retries) + " for port " + port);
                 }
             }
         }
@@ -184,6 +196,7 @@ public class PortScanner {
 
         } catch (IOException e) {
             System.out.println("Error reading HTTP banner.");
+            logError("Error reading HTTP banner: " + e.getMessage());
         }
     }
 
@@ -208,6 +221,7 @@ public class PortScanner {
 
         } catch (IOException e) {
             System.out.println("Error reading FTP banner.");
+            logError("Error reading FTP banner: " + e.getMessage());
         }
     }
 
@@ -232,6 +246,7 @@ public class PortScanner {
 
         } catch (IOException e) {
             System.out.println("Error reading SSH banner.");
+            logError("Error reading SSH banner: " + e.getMessage());
         }
     }
 
@@ -251,6 +266,7 @@ public class PortScanner {
 
         } catch (IOException e) {
             System.out.println("Error reading SMTP banner.");
+            logError("Error reading SMTP banner: " + e.getMessage());
         }
     }
 
@@ -289,36 +305,54 @@ public class PortScanner {
             sslSocket.close();
         } catch (Exception e) {
             System.out.println("Unable to connect to HTTPS service or retrieve banner. Error: " + e.getMessage());
-                }
+            logError("Error reading HTTPS banner: " + e.getMessage());
+        }
     }
 
     // ------------------ VULNERABILITY DATABASE METHODS --------------------------------------------------------
     public static void loadVulnerabilityDatabase(String fileName) {
+        File file = new File(fileName);
+        if (!file.exists()) {
+            System.out.println("Vulnerability database file not found: " + fileName);
+            logError("Vulnerability database file not found: " + fileName);
+            return;
+        }
         try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
             String line;
+            reader.readLine();
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
+
+                if (parts.length < 5) {
+                    System.out.println("Invalid line in vulnerability database: " + line);
+                    continue;
+                }
+
                 String service = parts[0].trim();
                 String version = parts[1].trim();
                 String cve = parts[2].trim();
                 String description = parts[3].trim();
                 String severity = parts[4].trim();
 
-                vulnerabilityDatabase.put(service + "-" + version, cve + ": " + description + " (Severity: " + severity + ")");
+                String key = service + version;
+                vulnerabilityDatabase.put(key, cve + ": " + description + " (Severity: " + severity + ")");
+                System.out.println("Loaded vulnerability: " + service + " " + version + " -> " + cve + " (Severity: " + severity + ")");
             }
         } catch (IOException e) {
             System.out.println("Error loading vulnerability database.");
+            logError("Error loading vulnerability database: " + e.getMessage());
         }
     }
 
     public static void matchVulnerabilities(String service, String version) {
-        String key = service + "-" + version;
+       String key = service + version;
         if (vulnerabilityDatabase.containsKey(key)) {
-            System.out.println("**** VULNERABILITIY IDENTIFIED ****: " + vulnerabilityDatabase.get(key));
+            System.out.println("**** VULNERABILITY IDENTIFIED ****: " + vulnerabilityDatabase.get(key));
+            logError("Vulnerability identified: " + vulnerabilityDatabase.get(key));
         } else {
-            System.out.println("No known vulnerabilities identified for the service and version: " + service + version);
+            System.out.println("No known vulnerabilities identified for: " + service + " " + version);
         }
-    }
+    }    
 
     public static String extractVersion(String banner) {
         String version = "Unknown";
@@ -354,11 +388,44 @@ public class PortScanner {
         System.out.println("------------- END OF SCAN RESULTS -------------");
     }
 
-    public static void logToFile(String logMessage) {
-        try (FileWriter out = new FileWriter("scan_results.txt", true)) {
-            out.write(logMessage + "\n");
+    public static void logError(String errorMessage) {
+        try (FileWriter out = new FileWriter(LOG_FILE, true)) {
+            out.write(errorMessage + "\n");
         } catch (IOException e) {
             System.out.println("Error writing to file.");
+        }
+    }
+
+    public static void printVulnerabilityDatabase() {
+        if (vulnerabilityDatabase.isEmpty()) {
+            System.out.println("No vulnerabilities found in the database.");
+        } else {
+            System.out.println("\nKnown Vulnerabilities: ");
+            for (Map.Entry<String, String> entry : vulnerabilityDatabase.entrySet()) {
+                System.out.println("Service: " + entry.getKey() + " - " + entry.getValue());
+            }
+        }
+    }
+
+    public static void generateReport(String ipAddress) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(REPORT_FILE))) {
+            writer.println("Scan Report for IP: " + ipAddress);
+            writer.println("Date/Time: " + java.time.LocalDateTime.now());
+            writer.println("------------- SCAN RESULTS -------------");
+            writer.println("Port,Status,Service,Version,Vulnerability,Severity");
+            writer.println("Open ports:");
+            for (String openPort : openPorts) {
+                writer.println(openPort);
+            }
+            writer.println("Closed Ports:");
+            for (String closedPort : closedPorts) {
+                writer.println(closedPort);
+            }
+            writer.println("------------- END OF SCAN REPORT -------------\n");
+            System.out.println("Report generated successfully as " + REPORT_FILE);
+        } catch (IOException e) {
+            System.out.println("Error generating report.");
+            logError("error generating report: " + e.getMessage());
         }
     }
 }
