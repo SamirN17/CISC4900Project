@@ -28,6 +28,9 @@ public class PortScanner {
     // Database of known vulnerabilities, loaded from the CSV file
     private static Map<String, String> vulnerabilityDatabase = new HashMap<>();
 
+    // Stores banners
+    private static Map<String, String> banners = new HashMap<>();
+
     private static final String LOG_FILE = "scan_log.txt";
     private static final String REPORT_FILE = "scan_report.csv";
 
@@ -40,12 +43,17 @@ public class PortScanner {
         Scanner scanner = new Scanner(System.in);
         while (true) {
             System.out.println("============================================");
-            System.out.println("Wlecome to the VulnerabilityScan Menu");
+            System.out.println("Welcome to VulnerabilityScan");
             System.out.println("1. Start a port scan");
             System.out.println("2. View known vulnerabilities");
-            System.out.println("3. Exit");
+            System.out.println("3. Configure settings");
+            System.out.println("4. Choose output format");
+            System.out.println("5. View previous scan report");
+            System.out.println("6. Retry scanning closed ports");
+            System.out.println("7. Exit");
             System.out.print("Choose an option: ");
             int option = scanner.nextInt();
+            
             switch (option) {
                 case 1:
                     startScan();
@@ -54,12 +62,32 @@ public class PortScanner {
                     printVulnerabilityDatabase();
                     break;
                 case 3:
+                    configureSettings(scanner);
+                    break;
+                case 4:
+                    chooseOutputFormat();
+                    break;
+                case 5:
+                    viewPreviousReport();
+                    break;
+                case 6:
+                    retryOpenPorts();
+                    break;
+                case 7:
                     System.out.println("Exiting the program.");
                     System.exit(0);
                 default:
                     System.out.println("Invalid option. Please try again.");
             }
         }
+    }
+
+    public static void configureSettings(Scanner scanner) {
+        System.out.print("Enter new timeout value (ms): ");
+        int timeout = scanner.nextInt();
+        System.out.print("Enter number of connection retries: ");
+        int retries = scanner.nextInt();
+        System.out.println("Settings updated: Timeout = " + timeout + "ms, Retries = " + retries);
     }
 
     public static void startScan() {
@@ -88,11 +116,12 @@ public class PortScanner {
         for (int port = startPort; port <= endPort; port++) {
             int currentPort = port;
             executorService.submit(() -> scanPortAndGrabBanner(ipAddress, currentPort));
+            showProgress(currentPort, startPort, endPort);
         }
 
         executorService.shutdown();
         try {
-            if (!executorService.awaitTermination(2, TimeUnit.MINUTES)) {
+            if (!executorService.awaitTermination(1, TimeUnit.MINUTES)) {
                 System.out.println("Some tasks took too long to finish. Forcing shutdown.");
                 executorService.shutdownNow();
             }
@@ -104,7 +133,18 @@ public class PortScanner {
         Scanner scanner2 = new Scanner(System.in);
         String saveToFile = scanner2.nextLine();
         if (saveToFile.equalsIgnoreCase("yes")) {
-            generateReport(ipAddress);
+            switch (outputFormat.toLowerCase()) {
+                case "csv":
+                    generateCSVReport(ipAddress);
+                    break;
+                case "json":
+                    generateJSONReport(ipAddress);
+                    break;
+                default:
+                    printSummary();
+                    System.out.println("Report printed to console as no file format was selected.");
+                    break;
+            }
         } else {
             printSummary();
         }
@@ -129,7 +169,12 @@ public class PortScanner {
 
                 // Creates a socket and attempts to connect to the specified port, with a timeout of 2 seconds
                 Socket socket = new Socket();
-                socket.connect(new InetSocketAddress(ipAddress, port), 2000);
+                InetSocketAddress address = new InetSocketAddress(ipAddress, port);
+                if (tryConnectWithRetry(socket, address, 3)) {
+                    grabHttpBanner(socket);
+                } else {
+                    closedPorts.add("Port " + port + " is unreachable on " + ipAddress);
+                }
 
 
                 // if the port is open, add it to the list and attempt to grab a banner
@@ -137,29 +182,32 @@ public class PortScanner {
                 System.out.println(openMessage);
                 openPorts.add(openMessage);
 
+                String banner = "No banner grabbed";
                 switch (port) {
                     case 21:
-                        grabFtpBanner(socket);
+                        banner = grabFtpBanner(socket);
                         break;
                     case 22:
-                        grabSshBanner(socket);
+                        banner = grabSshBanner(socket);
                         break;
                     case 25:
-                        grabSmtpBanner(socket);
+                        banner = grabSmtpBanner(socket);
                         break;
                     case 80:
-                        grabHttpBanner(socket);
+                        banner = grabHttpBanner(socket);
                         break;
                     case 443:
-                        grabHttpsBanner(socket);
+                        banner = grabHttpsBanner(socket);
                         break;
                     default:
                         System.out.printf("Attempted connection to %s on port %d.\n", ipAddress, port);
                         break;
                 }
 
+                banners.put(String.valueOf(port), banner);  // Store banner for this port
                 socket.close();
                 break;
+
 
             } catch (IOException e) {
                 retries--;
@@ -175,21 +223,27 @@ public class PortScanner {
         }
     }
 
+    public static void showProgress(int currentPort, int startPort, int endPort) {
+        int totalPorts = endPort - startPort + 1;
+        int scannedPorts = currentPort - startPort + 1;
+        int progress = (scannedPorts * 100) / totalPorts;
+        System.out.printf("Progress: %d%% (%d/%d ports scanned)\r", progress, scannedPorts, totalPorts);
+    }
+    
+
     // ------------------ BANNER GRABBER METHODS --------------------------------------------------------
 
-    public static void grabHttpBanner(Socket socket) {
+    public static String grabHttpBanner(Socket socket) {
+        StringBuilder banner = new StringBuilder();
         try {
             String httpRequest = "GET / HTTP/1.1\r\nHost: " + socket.getInetAddress().getHostAddress() + "\r\n\r\n";
             socket.getOutputStream().write(httpRequest.getBytes());
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String responseLine;
-            StringBuilder banner = new StringBuilder();
-
-            System.out.println("HTTP Banner: ");
             while ((responseLine = reader.readLine()) != null && !responseLine.isEmpty()) {
                 System.out.println(responseLine);
-                banner.append(responseLine).append("\n");
+                banner.append(responseLine).append(" ");
             }
 
             matchVulnerabilities("Apache", extractVersion(banner.toString()));
@@ -198,18 +252,18 @@ public class PortScanner {
             System.out.println("Error reading HTTP banner.");
             logError("Error reading HTTP banner: " + e.getMessage());
         }
+        return banner.toString().trim();
     }
 
-    public static void grabFtpBanner(Socket socket) {
+    public static String grabFtpBanner(Socket socket) {
+        StringBuilder banner = new StringBuilder();
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String responseLine;
-            StringBuilder banner = new StringBuilder();
 
-            System.out.println("FTP Banner: ");
             while ((responseLine = reader.readLine()) != null && !responseLine.isEmpty()) {
                 System.out.println(responseLine);
-                banner.append(responseLine).append("\n");
+                banner.append(responseLine).append(" ");
             }
 
             if (banner.length() > 0) {
@@ -223,18 +277,18 @@ public class PortScanner {
             System.out.println("Error reading FTP banner.");
             logError("Error reading FTP banner: " + e.getMessage());
         }
+        return banner.toString().trim();
     }
 
-    public static void grabSshBanner(Socket socket) {
+    public static String grabSshBanner(Socket socket) {
+        StringBuilder banner = new StringBuilder();
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String responseLine;
-            StringBuilder banner = new StringBuilder();
 
-            System.out.println("SSH Banner: ");
             while ((responseLine = reader.readLine()) != null && !responseLine.isEmpty()) {
                 System.out.println(responseLine);
-                banner.append(responseLine).append("\n");
+                banner.append(responseLine).append(" ");
             }
 
             if (banner.length() > 0) {
@@ -242,24 +296,25 @@ public class PortScanner {
                 matchVulnerabilities("OpenSSH", extractVersion(banner.toString()));
             } else {
                 System.out.println("No SSH banner detected.");
+                logError("No SSH banner detected.");
             }            
 
         } catch (IOException e) {
             System.out.println("Error reading SSH banner.");
             logError("Error reading SSH banner: " + e.getMessage());
         }
+        return banner.toString().trim();
     }
 
-    public static void grabSmtpBanner(Socket socket) {
+    public static String grabSmtpBanner(Socket socket) {
+        StringBuilder banner = new StringBuilder();
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String responseLine;
-            StringBuilder banner = new StringBuilder();
 
-            System.out.println("SMTP Banner: ");
             while ((responseLine = reader.readLine()) != null && !responseLine.isEmpty()) {
                 System.out.println(responseLine);
-                banner.append(responseLine).append("\n");
+                banner.append(responseLine).append(" ");
             }
 
             matchVulnerabilities("SMTP", extractVersion(banner.toString()));
@@ -268,9 +323,11 @@ public class PortScanner {
             System.out.println("Error reading SMTP banner.");
             logError("Error reading SMTP banner: " + e.getMessage());
         }
+        return banner.toString().trim();
     }
 
-    public static void grabHttpsBanner(Socket socket) {
+    public static String grabHttpsBanner(Socket socket) {
+        StringBuilder banner = new StringBuilder();
         try {
             SSLSocketFactory factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
             SSLSocket sslSocket = (SSLSocket) factory.createSocket(
@@ -307,7 +364,61 @@ public class PortScanner {
             System.out.println("Unable to connect to HTTPS service or retrieve banner. Error: " + e.getMessage());
             logError("Error reading HTTPS banner: " + e.getMessage());
         }
+        return banner.toString().trim();
     }
+
+    public static boolean tryConnectWithRetry(Socket socket, InetSocketAddress address, int retries) {
+        while (retries > 0) {
+            try {
+                socket.connect(address, 2000); // 2-second timeout
+                return true;
+            } catch (IOException e) {
+                retries--;
+                System.out.println("Retrying connection to " + address + " (" + retries + " retries left)");
+            }
+        }
+        return false;
+    }
+    
+    public static String getPortDetails(String portInfo) {
+        String[] parts = portInfo.split(" ");
+        return parts[1]; // Assuming "Port <port> is OPEN" format
+    }
+    
+    public static void retryOpenPorts() {
+        if (closedPorts.isEmpty()) {
+            System.out.println("No previously closed ports to retry.");
+            return;
+        }
+    
+        System.out.println("\nRetrying closed ports...");
+        List<String> failedPorts = new ArrayList<>();
+        
+        for (String closedPortEntry : closedPorts) {
+            String[] parts = closedPortEntry.split(" ");
+            String portString = parts[1];  
+            int port = Integer.parseInt(portString);
+    
+            try {
+                Socket socket = new Socket();
+                socket.connect(new InetSocketAddress("127.0.0.1", port), 2000);
+                System.out.printf("Port %d is now OPEN.\n", port);
+                openPorts.add("Port " + port + " is OPEN");
+                closedPorts.remove(closedPortEntry);
+                socket.close();
+            } catch (IOException e) {
+                System.out.printf("Port %d is still CLOSED.\n", port);
+                failedPorts.add(closedPortEntry);
+            }
+        }
+    
+        closedPorts.clear();
+        closedPorts.addAll(failedPorts);
+    
+        System.out.println("\nRetry scan complete.");
+        printSummary();
+    }    
+
 
     // ------------------ VULNERABILITY DATABASE METHODS --------------------------------------------------------
     public static void loadVulnerabilityDatabase(String fileName) {
@@ -372,6 +483,8 @@ public class PortScanner {
         return version;
     }
 
+    // ------------------ LOGGING METHODS --------------------------------------------------------
+
     public static void printSummary() {
         System.out.println("\n------------- SUMMARY -------------");
 
@@ -407,25 +520,171 @@ public class PortScanner {
         }
     }
 
-    public static void generateReport(String ipAddress) {
-        try (PrintWriter writer = new PrintWriter(new FileWriter(REPORT_FILE))) {
-            writer.println("Scan Report for IP: " + ipAddress);
-            writer.println("Date/Time: " + java.time.LocalDateTime.now());
-            writer.println("------------- SCAN RESULTS -------------");
-            writer.println("Port,Status,Service,Version,Vulnerability,Severity");
-            writer.println("Open ports:");
+    public static void generateCSVReport(String ipAddress) {
+        String csvFile = "scan_results.csv";
+        try (PrintWriter writer = new PrintWriter(new FileWriter(csvFile))) {
+            writer.println("IP Address,Port,Status,Banner,Vulnerability,Description,Severity");
+    
             for (String openPort : openPorts) {
-                writer.println(openPort);
+                String[] parts = openPort.split(" ");
+                String port = parts[1];
+                String banner = banners.getOrDefault(port, "No banner grabbed");
+                String vulnerability = "No known vulnerabilities found";
+                String description = "";
+                String severity = "";
+    
+                if (!banner.equals("No banner grabbed")) {
+                    String service = getServiceFromBanner(banner);
+                    String version = extractVersion(banner);
+                    String key = service + version;
+    
+                    if (vulnerabilityDatabase.containsKey(key)) {
+                        String[] vulnInfo = vulnerabilityDatabase.get(key).split(": ");
+                        vulnerability = vulnInfo[0];
+                        description = vulnInfo[1].split(" \\(Severity: ")[0];
+                        severity = vulnInfo[1].split(" \\(Severity: ")[1].replace(")", "");
+                    }
+                }
+    
+                writer.printf("%s,%s,OPEN,%s,%s,%s,%s\n", ipAddress, port, banner, vulnerability, description, severity);
             }
-            writer.println("Closed Ports:");
+    
             for (String closedPort : closedPorts) {
-                writer.println(closedPort);
+                String[] parts = closedPort.split(" ");
+                String port = parts[1];
+                writer.printf("%s,%s,CLOSED,,,\n", ipAddress, port);
             }
-            writer.println("------------- END OF SCAN REPORT -------------\n");
-            System.out.println("Report generated successfully as " + REPORT_FILE);
+    
+            System.out.println("CSV report generated successfully as " + csvFile);
         } catch (IOException e) {
-            System.out.println("Error generating report.");
-            logError("error generating report: " + e.getMessage());
+            System.out.println("Error generating CSV report.");
+            logError("Error generating CSV report: " + e.getMessage());
         }
     }
+
+    public static void generateJSONReport(String ipAddress) {
+        String jsonFile = "scan_report.json";
+        try (PrintWriter writer = new PrintWriter(new FileWriter(jsonFile))) {
+            writer.println("{");
+            writer.printf("  \"IP Address\": \"%s\",\n", ipAddress);
+            writer.printf("  \"Date/Time\": \"%s\",\n", java.time.LocalDateTime.now());
+            
+            writer.println("  \"Open Ports\": [");
+            for (int i = 0; i < openPorts.size(); i++) {
+                String openPort = openPorts.get(i);
+                String port = getPortDetails(openPort);
+                String banner = banners.getOrDefault(port, "No banner grabbed");
+                String vulnerability = "No known vulnerabilities found";
+                String description = "";
+                String severity = "";
+    
+                if (!banner.equals("No banner grabbed")) {
+                    String service = getServiceFromBanner(banner);
+                    String version = extractVersion(banner);
+                    String key = service + version;
+    
+                    if (vulnerabilityDatabase.containsKey(key)) {
+                        String[] vulnInfo = vulnerabilityDatabase.get(key).split(": ");
+                        vulnerability = vulnInfo[0];
+                        description = vulnInfo[1].split(" \\(Severity: ")[0];
+                        severity = vulnInfo[1].split(" \\(Severity: ")[1].replace(")", "");
+                    }
+                }
+    
+                writer.printf("    {\"Port\": \"%s\", \"Status\": \"OPEN\", \"Banner\": \"%s\", \"Vulnerability\": \"%s\", \"Description\": \"%s\", \"Severity\": \"%s\"}", 
+                              port, banner, vulnerability, description, severity);
+                if (i < openPorts.size() - 1) writer.print(",");
+                writer.println();
+            }
+            writer.println("  ],");
+    
+            writer.println("  \"Closed Ports\": [");
+            for (int i = 0; i < closedPorts.size(); i++) {
+                String closedPort = closedPorts.get(i);
+                String port = getPortDetails(closedPort);
+    
+                writer.printf("    {\"Port\": \"%s\", \"Status\": \"CLOSED\"}", port);
+                if (i < closedPorts.size() - 1) writer.print(",");
+                writer.println();
+            }
+            writer.println("  ]");
+            writer.println("}");
+            
+            System.out.println("JSON Report generated successfully as " + jsonFile);
+        } catch (IOException e) {
+            System.out.println("Error generating JSON report.");
+            logError("Error generating JSON report: " + e.getMessage());
+        }
+    }
+    
+    
+
+    public static String getServiceFromBanner(String banner) {
+        if (banner.contains("Apache")) return "Apache";
+        if (banner.contains("OpenSSH")) return "OpenSSH";
+        if (banner.contains("MySQL")) return "MySQL";
+        if (banner.contains("FTP")) return "FTP";
+        if (banner.contains("SMTP")) return "SMTP";
+        return "Unknown";
+    }    
+    
+
+    public static String outputFormat = "console";
+
+    public static void viewPreviousReport() {
+        try (BufferedReader reader = new BufferedReader(new FileReader(REPORT_FILE))) {
+            System.out.println("\nPrevious Scan Report:");
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+        } catch (IOException e) {
+            System.out.println("No previous report found or error reading report file.");
+            logError("Error reading previous report: " + e.getMessage());
+        }
+    }    
+
+    public static void chooseOutputFormat() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("\nChoose Output Format:");
+        System.out.println("1. Console");
+        System.out.println("2. CSV File");
+        System.out.println("3. JSON File");
+        System.out.print("Enter your choice: ");
+        
+        int formatOption = scanner.nextInt();
+        scanner.nextLine();
+        
+        switch (formatOption) {
+            case 1:
+                outputFormat = "console";
+                System.out.println("Output format set to Console.");
+                break;
+            case 2:
+                outputFormat = "csv";
+                System.out.println("Output format set to CSV File.");
+                break;
+            case 3:
+                outputFormat = "json";
+                System.out.println("Output format set to JSON File.");
+                break;
+            default:
+                System.out.println("Invalid option. Defaulting to Console.");
+                outputFormat = "console";
+        }
+    }
+
+    public static void generateReport(String ipAddress) {
+        switch (outputFormat) {
+            case "console":
+                printSummary();  // Print results to the console
+                break;
+            case "csv":
+                generateCSVReport(ipAddress);
+                break;
+            case "json":
+                generateJSONReport(ipAddress);
+                break;
+        }
+    }    
 }
