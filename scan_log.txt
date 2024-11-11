@@ -1128,3 +1128,96 @@ Error connecting to port 50: Connection refused: no further information
 Error reading SMTP banner: Socket is not connected
 Error reading SSH banner: Socket is not connected
 Error reading FTP banner: Socket is not connected
+Error reading SMTP banner: Socket is not connected
+Error reading HTTP banner: An established connection was aborted by the software in your host machine
+Error reading FTP banner: An established connection was aborted by the software in your host machine
+Error reading HTTP banner: Connection reset
+Error reading SSH banner: Connection reset
+Error reading SSH banner: Socket is not connected
+Error reading SMTP banner: Socket is not connected
+Error reading FTP banner: Socket is not connected
+Error reading SMTP banner: Socket is not connected
+Error reading SSH banner: Socket is not connected
+Error reading FTP banner: Socket is not connected
+2024-11-10T23:47:34.214177200 - Error extracting port from message: 80 - Index 1 out of bounds for length 1
+2024-11-10T23:47:34.214177200 - Error extracting port from message: 80 - Index 1 out of bounds for length 1
+2024-11-10T23:47:34.214177200 - Error extracting port from message: 80 - Index 1 out of bounds for length 1
+2024-11-10T23:57:13.914713900 - Error extracting port from message: 80 - Index 1 out of bounds for length 1
+2024-11-10T23:57:13.914713900 - Error extracting port from message: 80 - Index 1 out of bounds for length 1
+2024-11-10T23:57:13.914713900 - Error extracting port from message: 80 - Index 1 out of bounds for length 1
+2024-11-11T00:05:51.236731600 - Error extracting port from message: 21 - Index 1 out of bounds for length 1
+2024-11-11T00:05:51.236731600 - Error extracting port from message: 21 - Index 1 out of bounds for length 1
+2024-11-11T00:05:51.236731600 - Error extracting port from message: 21 - Index 1 out of bounds for length 1
+2024-11-11T00:05:51.237731800 - Error extracting port from message: 22 - Index 1 out of bounds for length 1
+2024-11-11T00:05:51.237731800 - Error extracting port from message: 22 - Index 1 out of bounds for length 1
+2024-11-11T00:05:51.237731800 - Error extracting port from message: 22 - Index 1 out of bounds for length 1
+2024-11-11T00:14:19.510884500 - Error extracting port from message: 21 - Index 1 out of bounds for length 1
+2024-11-11T00:14:19.510884500 - Error extracting port from message: 21 - Index 1 out of bounds for length 1
+2024-11-11T00:14:19.512164 - Error extracting port from message: 21 - Index 1 out of bounds for length 1
+2024-11-11T00:14:19.512164 - Error extracting port from message: 22 - Index 1 out of bounds for length 1
+2024-11-11T00:14:19.512164 - Error extracting port from message: 22 - Index 1 out of bounds for length 1
+2024-11-11T00:14:19.512164 - Error extracting port from message: 22 - Index 1 out of bounds for length 1
+2024-11-11T00:22:16.795880900 - Error extracting port from message: 22 - Index 1 out of bounds for length 1
+2024-11-11T00:22:16.796879600 - Error extracting port from message: 21 - Index 1 out of bounds for length 1
+2024-11-11T00:22:37.331167400 - Error extracting port from message: 22 - Index 1 out of bounds for length 1
+2024-11-11T00:22:37.332167900 - Error extracting port from message: 21 - Index 1 out of bounds for length 1
+2024-11-11T00:44:29.987003700 - Error connecting to port 28
+2024-11-11T00:44:29.987003700 - Error connecting to port 24
+2024-11-11T00:44:29.987003700 - Error connecting to port 27
+2024-11-11T00:44:29.987003700 - Error connecting to port 26
+2024-11-11T00:44:29.987003700 - Error connecting to port 29
+2024-11-11T00:44:29.990009600 - Error connecting to port 25
+2024-11-11T00:44:29.993010900 - Error connecting to port 23
+2024-11-11T00:44:29.994012200 - Error connecting to port 20
+2024-11-11T00:44:29.994012200 - Error connecting to port 31
+2024-11-11T00:44:29.995581300 - Error connecting to port 32
+2024-11-11T00:44:29.996525500 - Error connecting to port 33
+2024-11-11T00:44:29.999531800 - Error connecting to port 35
+2024-11-11T00:44:30.001530800 - Error connecting to port 34
+2024-11-11T00:44:30.004656400 - Error connecting to port 36
+2024-11-11T00:44:30.004656400 - Error connecting to port 37
+2024-11-11T00:44:30.006257200 - Error connecting to port 38
+2024-11-11T00:44:30.006761500 - Error connecting to port 40
+2024-11-11T00:44:30.008767300 - Error connecting to port 39
+2024-11-11T00:44:30.010768400 - Error connecting to port 41
+2024-11-11T00:44:30.012768400 - Error connecting to port 42
+2024-11-11T00:44:30.013767300 - Error connecting to port 43
+2024-11-11T00:44:30.013767300 - Error connecting to port 44
+2024-11-11T00:44:30.015769600 - Error connecting to port 46
+2024-11-11T00:44:30.016274100 - Error connecting to port 45
+2024-11-11T00:44:30.017279500 - Error connecting to port 48
+2024-11-11T00:44:30.018285700 - Error connecting to port 30
+2024-11-11T00:44:30.020286200 - Error connecting to port 49
+2024-11-11T00:44:30.020286200 - Error connecting to port 51
+2024-11-11T00:44:30.023284600 - Error connecting to port 53
+2024-11-11T00:44:30.024286 - Error connecting to port 55
+2024-11-11T00:44:30.024286 - Error connecting to port 56
+2024-11-11T00:44:30.025791400 - Error connecting to port 47
+2024-11-11T00:44:30.026797500 - Error connecting to port 54
+2024-11-11T00:44:30.027803100 - Error connecting to port 57
+2024-11-11T00:44:30.027803100 - Error connecting to port 52
+2024-11-11T00:44:30.027803100 - Error connecting to port 58
+2024-11-11T00:44:30.028978900 - Error connecting to port 50
+2024-11-11T00:44:30.037631200 - Error connecting to port 59
+2024-11-11T00:44:30.039316700 - Error connecting to port 60
+2024-11-11T00:58:38.484612400 - Error connecting to port 25
+2024-11-11T00:58:38.485611200 - Error connecting to port 29
+2024-11-11T00:58:38.484612400 - Error connecting to port 26
+2024-11-11T00:58:38.484612400 - Error connecting to port 24
+2024-11-11T00:58:38.484612400 - Error connecting to port 23
+2024-11-11T00:58:38.486610700 - Error connecting to port 27
+2024-11-11T00:58:38.485611200 - Error connecting to port 28
+2024-11-11T00:58:38.484612400 - Error connecting to port 20
+2024-11-11T00:58:38.495121700 - Error connecting to port 34
+2024-11-11T00:58:38.496122200 - Error connecting to port 31
+2024-11-11T00:58:38.497122600 - Error connecting to port 30
+2024-11-11T00:58:38.497122600 - Error connecting to port 36
+2024-11-11T00:58:38.497122600 - Error connecting to port 32
+2024-11-11T00:58:38.498121800 - Error connecting to port 35
+2024-11-11T00:58:38.499122400 - Error connecting to port 33
+2024-11-11T00:58:38.500121700 - Error connecting to port 37
+2024-11-11T00:58:38.501121900 - Error connecting to port 38
+2024-11-11T00:58:38.502122700 - Error connecting to port 39
+2024-11-11T00:58:38.502122700 - Error connecting to port 40
+2024-11-11T01:05:01.504585300 - Error extracting port from message: 21 - Index 1 out of bounds for length 1
+2024-11-11T01:05:01.505584800 - Error extracting port from message: 22 - Index 1 out of bounds for length 1

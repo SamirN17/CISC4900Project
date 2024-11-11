@@ -1,0 +1,29 @@
+{
+  "IP Address": "127.0.0.1",
+  "Date/Time": "2024-11-11T01:05:01.503585200",
+  "Open Ports": [
+    {"Port": "21", "Status": "OPEN", "Banner": "No banner grabbed", "Vulnerability": "No known vulnerabilities found."},
+    {"Port": "22", "Status": "OPEN", "Banner": "No banner grabbed", "Vulnerability": "No known vulnerabilities found."}
+  ],
+  "Closed Ports": [
+    {"Port": "26", "Status": "CLOSED"},
+    {"Port": "27", "Status": "CLOSED"},
+    {"Port": "23", "Status": "CLOSED"},
+    {"Port": "20", "Status": "CLOSED"},
+    {"Port": "25", "Status": "CLOSED"},
+    {"Port": "30", "Status": "CLOSED"},
+    {"Port": "29", "Status": "CLOSED"},
+    {"Port": "35", "Status": "CLOSED"},
+    {"Port": "31", "Status": "CLOSED"},
+    {"Port": "32", "Status": "CLOSED"},
+    {"Port": "33", "Status": "CLOSED"},
+    {"Port": "28", "Status": "CLOSED"},
+    {"Port": "34", "Status": "CLOSED"},
+    {"Port": "37", "Status": "CLOSED"},
+    {"Port": "38", "Status": "CLOSED"},
+    {"Port": "39", "Status": "CLOSED"},
+    {"Port": "36", "Status": "CLOSED"},
+    {"Port": "40", "Status": "CLOSED"},
+    {"Port": "24", "Status": "CLOSED"}
+  ]
+}
