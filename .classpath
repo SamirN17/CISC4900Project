@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+    <!-- Specify the source folder -->
+    <classpathentry kind="src" path="src"/>
+
+    <!-- Specify the output folder for compiled files -->
+    <classpathentry kind="output" path="bin"/>
+
+    <!-- Specify the library (JAR file) -->
+    <classpathentry kind="lib" path="libs/json-20230227.jar"/>
+</classpath>

@@ -1,0 +1,315 @@
+<ScanReport>
+  <IPAddress>8.8.8.8</IPAddress>
+  <DateTime>2024-11-26T20:29:03.425049600</DateTime>
+  <OpenPorts>
+    <Port number="80">
+      <Status>OPEN</Status>
+      <Banner>HTTP/1.1 404 Not Found Content-Type: text/html Date: Wed, 27 Nov 2024 01:26:33 GMT Server: ECAcc (nyd/D125) Content-Length: 345</Banner>
+      <Vulnerability>No known vulnerabilities found</Vulnerability>
+    </Port>
+    <Port number="53">
+      <Status>OPEN</Status>
+      <Banner>No banner grabbed</Banner>
+      <Vulnerability>No known vulnerabilities found</Vulnerability>
+    </Port>
+  </OpenPorts>
+  <ClosedPorts>
+    <Port number="1">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="2">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="3">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="4">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="5">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="6">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="7">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="8">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="9">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="10">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="11">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="12">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="13">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="14">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="15">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="16">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="17">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="18">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="19">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="20">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="21">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="22">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="23">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="24">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="25">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="26">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="27">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="28">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="29">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="30">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="31">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="32">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="33">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="34">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="35">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="36">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="37">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="38">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="39">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="40">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="41">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="42">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="43">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="44">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="45">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="46">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="47">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="48">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="49">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="50">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="51">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="52">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="53">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="54">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="55">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="56">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="57">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="58">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="59">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="60">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="61">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="62">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="63">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="64">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="65">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="66">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="67">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="68">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="69">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="70">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="71">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="72">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="73">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="74">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="75">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="76">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="77">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="78">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="79">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="81">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="82">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="83">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="84">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="85">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="86">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="87">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="88">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="89">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="90">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="91">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="92">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="93">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="94">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="95">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="96">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="97">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="98">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="99">
+      <Status>CLOSED</Status>
+    </Port>
+    <Port number="100">
+      <Status>CLOSED</Status>
+    </Port>
+  </ClosedPorts>
+</ScanReport>
