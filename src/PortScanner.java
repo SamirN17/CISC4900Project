@@ -622,42 +622,6 @@ public class PortScanner {
             System.out.println("Error generating JSON report: " + e.getMessage());
         }
     }
-        
-    public static void generateXMLReport(String ipAddress) {
-        try (PrintWriter writer = new PrintWriter(new FileWriter("scan_report.xml"))) {
-            writer.println("<ScanReport>");
-            writer.printf("  <IPAddress>%s</IPAddress>\n", ipAddress);
-            writer.printf("  <DateTime>%s</DateTime>\n", java.time.LocalDateTime.now());
-    
-            writer.println("  <OpenPorts>");
-            for (String openPort : getOpenPorts()) {
-                String port = getPortFromMessage(openPort);
-                String banner = getBanner(openPort);
-                String vulnerability = getVulnerability(openPort);
-                writer.printf("    <Port number=\"%s\">\n", port);
-                writer.printf("      <Status>OPEN</Status>\n");
-                writer.printf("      <Banner>%s</Banner>\n", banner);
-                writer.printf("      <Vulnerability>%s</Vulnerability>\n", vulnerability);
-                writer.println("    </Port>");
-            }
-            writer.println("  </OpenPorts>");
-    
-            writer.println("  <ClosedPorts>");
-            for (String closedPort : getClosedPorts()) {
-                String port = getPortFromMessage(closedPort);
-                writer.printf("    <Port number=\"%s\">\n", port);
-                writer.printf("      <Status>CLOSED</Status>\n");
-                writer.println("    </Port>");
-            }
-            writer.println("  </ClosedPorts>");
-            writer.println("</ScanReport>");
-    
-            System.out.println("XML report generated successfully.");
-        } catch (IOException e) {
-            System.out.println("Error generating XML report.");
-            logError("Error generating XML report: " + e.getMessage());
-        }
-    }    
             
     public static String checkVulnerability(String port, String banner) {
         // Extracts the service name and version from the banner
